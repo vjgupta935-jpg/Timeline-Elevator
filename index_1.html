@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maharashtra History Elevator - Ultimate Edition</title>
+    <meta name="description" content="Explore Maharashtra's rich history through an interactive elevator-style timeline with quizzes, achievements, and immersive features">
+    <meta name="keywords" content="Maharashtra, history, timeline, Shivaji, Maratha Empire, India, interactive, quiz, achievements">
+    
+    <!-- SEO and Social Media Meta Tags -->
+    <meta property="og:title" content="Maharashtra History Elevator - Ultimate Edition">
+    <meta property="og:description" content="Journey through Maharashtra's fascinating history with quizzes, achievements, and interactive features">
+    <meta property="og:type" content="website">
+    <meta property="twitter:card" content="summary_large_image">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- GSAP Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    
+    <!-- Chart.js for progress visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Skip Link for Accessibility -->
+    <a href="#timelineContainer" class="skip-link">Skip to main content</a>
+
+    <!-- Loading Screen with Enhanced Animation -->
+    <div class="loading-screen" role="dialog" aria-label="Loading Maharashtra History">
+        <div class="loading-content">
+            <div class="loading-elevator" aria-hidden="true">🛗</div>
+            <div class="loading-text" aria-live="polite">Loading Maharashtra History...</div>
+            <div class="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-tip">
+                <p id="loading-tip-text">Did you know? Maharashtra means "Great State" in Sanskrit</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Settings Panel -->
+    <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h3>Settings & Preferences</h3>
+                <button class="btn btn--secondary btn--sm" id="closeSettings" aria-label="Close Settings">×</button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <span>Theme</span>
+                        <select class="form-control" id="themeSelect">
+                            <option value="auto">Auto</option>
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="classic">Classic Gold</option>
+                            <option value="royal">Royal Purple</option>
+                            <option value="earth">Earth Tones</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <span>Animation Speed</span>
+                        <select class="form-control" id="animationSpeed">
+                            <option value="slow">Slow</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="fast">Fast</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">
+                        <span>Language</span>
+                        <select class="form-control" id="languageSelect">
+                            <option value="en">English</option>
+                            <option value="mr">मराठी (Marathi)</option>
+                            <option value="hi">हिन्दी (Hindi)</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label checkbox-label">
+                        <input type="checkbox" id="soundEffects" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Sound Effects</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label checkbox-label">
+                        <input type="checkbox" id="parallaxEffects" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Parallax Effects</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label checkbox-label">
+                        <input type="checkbox" id="autoplayAudio">
+                        <span class="checkbox-custom"></span>
+                        <span>Auto-play Audio Narrations</span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label checkbox-label">
+                        <input type="checkbox" id="reducedMotion">
+                        <span class="checkbox-custom"></span>
+                        <span>Reduce Motion (Accessibility)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Event Detail Modal -->
+    <div class="modal hidden" id="eventModal" role="dialog" aria-labelledby="eventModalTitle" aria-hidden="true">
+        <div class="modal-overlay" aria-hidden="true"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="eventModalTitle"></h2>
+                <button class="modal-close btn btn--secondary btn--sm" aria-label="Close Modal">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-tabs">
+                    <button class="modal-tab active" data-tab="overview">Overview</button>
+                    <button class="modal-tab" data-tab="details">Details</button>
+                    <button class="modal-tab" data-tab="quiz">Quiz</button>
+                    <button class="modal-tab" data-tab="multimedia">Multimedia</button>
+                </div>
+                
+                <div class="modal-tab-content">
+                    <div class="tab-panel active" id="overview-panel">
+                        <div class="modal-image">
+                            <img id="eventModalImage" alt="" />
+                            <div class="image-controls">
+                                <button class="btn btn--sm" id="playAudioBtn">🔊 Play Audio</button>
+                                <button class="btn btn--sm" id="virtualTourBtn">🗺️ Virtual Tour</button>
+                            </div>
+                        </div>
+                        <div class="modal-info">
+                            <div class="modal-year" id="eventModalYear"></div>
+                            <div class="modal-era" id="eventModalEra"></div>
+                            <p class="modal-description" id="eventModalDescription"></p>
+                            <div class="modal-tags" id="eventModalTags"></div>
+                            <div class="modal-key-figures" id="eventModalKeyFigures"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-panel" id="details-panel">
+                        <div class="modal-details" id="eventModalDetails"></div>
+                        <div class="related-events" id="relatedEvents">
+                            <h4>Related Events</h4>
+                            <div class="related-events-list" id="relatedEventsList"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-panel" id="quiz-panel">
+                        <div class="quiz-container" id="quizContainer">
+                            <div class="quiz-question" id="quizQuestion"></div>
+                            <div class="quiz-options" id="quizOptions"></div>
+                            <div class="quiz-result hidden" id="quizResult"></div>
+                            <button class="btn btn--primary" id="submitQuizBtn">Submit Answer</button>
+                        </div>
+                    </div>
+                    
+                    <div class="tab-panel" id="multimedia-panel">
+                        <div class="multimedia-content">
+                            <div class="audio-player" id="audioPlayer">
+                                <h4>🎵 Audio Narration</h4>
+                                <audio controls id="audioElement">
+                                    <source id="audioSource" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                            <div class="virtual-tour" id="virtualTour">
+                                <h4>🌍 Virtual Tour</h4>
+                                <div class="tour-placeholder">
+                                    <p>Immersive 360° tour of historical sites</p>
+                                    <button class="btn btn--secondary" id="launchTourBtn">Launch Virtual Tour</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="shareEvent">📤 Share</button>
+                <button class="btn btn--secondary" id="bookmarkEvent">🔖 Bookmark</button>
+                <button class="btn btn--secondary" id="addNotesBtn">📝 Add Notes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="modal hidden" id="notesModal" role="dialog" aria-labelledby="notesModalTitle">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-content--small">
+            <div class="modal-header">
+                <h3 id="notesModalTitle">Personal Notes</h3>
+                <button class="modal-close btn btn--secondary btn--sm">×</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="personalNotes" class="form-control" rows="6" placeholder="Add your personal notes about this event..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn--primary" id="saveNotesBtn">Save Notes</button>
+                <button class="btn btn--secondary" id="cancelNotesBtn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Mini-Map Navigation with Timeline Overview -->
+    <div class="mini-map" id="miniMap">
+        <div class="mini-map-header">
+            <span>Timeline Navigator</span>
+            <div class="mini-map-controls">
+                <button class="mini-map-btn" id="zoomInBtn" title="Zoom In">🔍+</button>
+                <button class="mini-map-btn" id="zoomOutBtn" title="Zoom Out">🔍-</button>
+                <button class="mini-map-toggle" id="miniMapToggle" aria-label="Toggle Mini Map">📍</button>
+            </div>
+        </div>
+        <div class="mini-map-content" id="miniMapContent">
+            <div class="mini-map-timeline">
+                <div class="mini-map-events" id="miniMapEvents"></div>
+                <div class="mini-map-indicator" id="miniMapIndicator"></div>
+            </div>
+            <div class="timeline-overview" id="timelineOverview">
+                <canvas id="timelineChart" style="position: relative; height: 100px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Control Panel -->
+    <div class="control-panel">
+        <button class="control-btn" id="achievementsBtn" aria-label="Achievements" title="Achievements">🏆</button>
+        <button class="control-btn" id="searchBtn" aria-label="Search" title="Search">🔍</button>
+        <!-- <button class="control-btn" id="settingsBtn" aria-label="Settings" title="Settings">⚙️</button> -->
+        <button class="control-btn" id="helpBtn" aria-label="Help" title="Help">❓</button>
+        <!-- <button class="control-btn" id="quizModeBtn" aria-label="Quiz Mode" title="Quiz Mode">❓</button> -->
+        <!-- <button class="control-btn" id="themeToggle" aria-label="Toggle Theme" title="Toggle Theme">🌙</button> -->
+        <!-- <button class="control-btn" id="soundToggle" aria-label="Toggle Sound" title="Toggle Sound">🔊</button> -->
+    </div>
+
+    <!-- Achievements Panel -->
+    <div class="achievements-panel hidden" id="achievementsPanel">
+        <div class="achievements-content">
+            <div class="achievements-header">
+                <h3>🏆 Achievements</h3>
+                <button class="btn btn--secondary btn--sm" id="closeAchievements">×</button>
+            </div>
+            <div class="achievements-body">
+                <div class="achievement-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalScore">0</span>
+                        <span class="stat-label">Total Score</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="eventsVisited">0</span>
+                        <span class="stat-label">Events Visited</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="quizzesCompleted">0</span>
+                        <span class="stat-label">Quizzes Completed</span>
+                    </div>
+                </div>
+                <div class="achievements-list" id="achievementsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Panel -->
+    <div class="search-panel hidden" id="searchPanel">
+        <div class="search-content">
+            <div class="search-header">
+                <h3>🔍 Search History</h3>
+                <button class="btn btn--secondary btn--sm" id="closeSearch">×</button>
+            </div>
+            <div class="search-body">
+                <div class="search-input-group">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search events, people, or keywords...">
+                    <button class="btn btn--primary" id="voiceSearchBtn" title="Voice Search">🎤</button>
+                </div>
+                <div class="search-filters">
+                    <label class="filter-label">
+                        <span>Era:</span>
+                        <select class="form-control form-control--sm" id="eraFilter">
+                            <option value="">All Eras</option>
+                            <option value="ancient">Ancient</option>
+                            <option value="medieval">Medieval</option>
+                            <option value="maratha">Maratha</option>
+                            <option value="british">British</option>
+                            <option value="independence">Independence</option>
+                            <option value="modern">Modern</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="search-results" id="searchResults"></div>
+                <div class="search-suggestions" id="searchSuggestions">
+                    <h4>Popular Searches</h4>
+                    <div class="suggestion-tags">
+                        <span class="suggestion-tag">Shivaji Maharaj</span>
+                        <span class="suggestion-tag">Maratha Empire</span>
+                        <span class="suggestion-tag">Independence Movement</span>
+                        <span class="suggestion-tag">Mumbai</span>
+                        <span class="suggestion-tag">Pune</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Mode Panel -->
+    <div class="quiz-mode-panel hidden" id="quizModePanel">
+        <div class="quiz-mode-content">
+            <div class="quiz-mode-header">
+                <h3>🎯 Quiz Challenge</h3>
+                <div class="quiz-score">Score: <span id="quizScore">0</span></div>
+                <button class="btn btn--secondary btn--sm" id="closeQuizMode">×</button>
+            </div>
+            <div class="quiz-mode-body">
+                <div class="quiz-progress">
+                    <div class="quiz-progress-bar">
+                        <div class="quiz-progress-fill" id="quizProgressFill"></div>
+                    </div>
+                    <div class="quiz-counter">Question <span id="currentQuizNumber">1</span> of <span id="totalQuizNumber">15</span></div>
+                </div>
+                <div class="current-quiz" id="currentQuiz">
+                    <div class="quiz-question-text" id="quizQuestionText"></div>
+                    <div class="quiz-options-list" id="quizOptionsList"></div>
+                    <div class="quiz-timer">
+                        <div class="timer-circle" id="timerCircle">
+                            <span id="timerText">30</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="quiz-controls">
+                    <button class="btn btn--primary" id="submitQuizAnswer">Submit Answer</button>
+                    <button class="btn btn--secondary" id="skipQuestion">Skip</button>
+                    <button class="btn btn--secondary" id="hintButton">💡 Hint</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Dashboard -->
+    <div class="progress-dashboard" id="progressDashboard">
+        <div class="progress-header">
+            <h4>📊 Learning Progress</h4>
+            <button class="dashboard-toggle" id="dashboardToggle">📈</button>
+        </div>
+        <div class="progress-content" id="progressContent">
+            <div class="progress-chart">
+                <canvas id="progressChart" style="position: relative; height: 120px;"></canvas>
+            </div>
+            <div class="progress-metrics">
+                <div class="metric-item">
+                    <span class="metric-value" id="timeSpent">0m</span>
+                    <span class="metric-label">Time Spent</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value" id="averageScore">0%</span>
+                    <span class="metric-label">Quiz Average</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Instructions -->
+    <div class="help-overlay hidden" id="helpOverlay">
+        <div class="help-content">
+            <h3>🎮 How to Navigate</h3>
+            <div class="help-instructions">
+                <div class="help-item">
+                    <span class="help-icon">🖱️</span>
+                    <span>Scroll to navigate through time</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">⌨️</span>
+                    <span>Use arrow keys for precise navigation</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">👆</span>
+                    <span>Touch and swipe on mobile devices</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">🗺️</span>
+                    <span>Use timeline navigator for quick jumps</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">📍</span>
+                    <span>Click events for detailed information</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">🎯</span>
+                    <span>Take quizzes to test your knowledge</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">🏆</span>
+                    <span>Earn achievements for exploring</span>
+                </div>
+                <div class="help-item">
+                    <span class="help-icon">🔍</span>
+                    <span>Search for specific events or topics</span>
+                </div>
+            </div>
+            <div class="help-shortcuts">
+                <h4>Keyboard Shortcuts</h4>
+                <div class="shortcut-list">
+                    <div class="shortcut-item"><kbd>↑/↓</kbd> Navigate events</div>
+                    <div class="shortcut-item"><kbd>Enter</kbd> Open event details</div>
+                    <div class="shortcut-item"><kbd>/</kbd> Search</div>
+                    <div class="shortcut-item"><kbd>?</kbd> Help</div>
+                    <div class="shortcut-item"><kbd>Esc</kbd> Close panels</div>
+                </div>
+            </div>
+            <button class="btn btn--primary" onclick="document.getElementById('helpOverlay').classList.add('hidden')">Got It! 🚀</button>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div class="app-container">
+        <!-- Enhanced Elevator Sidebar -->
+        <div class="elevator-sidebar" id="elevatorSidebar">
+            <div class="elevator-header">
+                <h1 class="elevator-title">🛗 Maharashtra History Elevator</h1>
+                <p class="elevator-subtitle">Ultimate Interactive Journey Through Time</p>
+                <div class="version-badge">v2.0 Ultimate Edition</div>
+            </div>
+            
+            <!-- Altitude Display -->
+            <div class="altitude-display">
+                <div class="year-counter">
+                    <span class="year-value" id="yearValue" aria-live="polite">2025</span>
+                    <span class="year-label">Current Year</span>
+                </div>
+                <div class="year-direction" id="yearDirection" aria-hidden="true">
+                    <span class="direction-indicator">↑</span>
+                    <span class="direction-text">Moving Forward</span>
+                </div>
+            </div>
+            
+            <!-- Enhanced Era Gauge -->
+            <div class="era-gauge">
+                <div class="gauge-container">
+                    <div class="gauge-fill" id="gaugeFill"></div>
+                    <div class="gauge-markers">
+                        <div class="gauge-marker" data-era="ancient">Ancient</div>
+                        <div class="gauge-marker" data-era="medieval">Medieval</div>
+                        <div class="gauge-marker" data-era="maratha">Maratha</div>
+                        <div class="gauge-marker" data-era="british">British</div>
+                        <div class="gauge-marker" data-era="independence">Independence</div>
+                        <div class="gauge-marker" data-era="modern">Modern</div>
+                    </div>
+                    <div class="gauge-label">
+                        <span class="era-name" id="eraName">Digital Era</span>
+                        <span class="era-temp" id="eraTemp">Innovation Age</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Enhanced Progress Indicator -->
+            <div class="progress-indicator">
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-label">Journey Progress</div>
+                <div class="progress-stats">
+                    <span id="currentEvent">1</span> of <span id="totalEvents">15</span> events
+                </div>
+                <div class="exploration-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">👁️</span>
+                        <span id="viewedEvents">0</span> viewed
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">🔖</span>
+                        <span id="bookmarkedCount">0</span> bookmarked
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">✅</span>
+                        <span id="quizzesCompleted">0</span> quizzes
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Enhanced Visual Container -->
+            <div class="visual-container" id="visualContainer">
+                <div class="image-layer active" data-era="modern">
+                    <img src="https://images.unsplash.com/photo-1566552881560-0be862a7c445?w=800&h=600&fit=crop&auto=format&q=80" 
+                         alt="Modern Maharashtra with IT hubs and skyscrapers" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3EModern Maharashtra%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div class="image-layer" data-era="independence">
+                    <img src="https://images.unsplash.com/photo-1605106702842-01a887a31122?w=800&h=600&fit=crop&auto=format&q=80" 
+                         alt="Independence era with Indian freedom movement imagery" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3EIndependence Era%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div class="image-layer" data-era="british">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format&q=80" 
+                         alt="British colonial period architecture and administration" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3EBritish Era%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div class="image-layer" data-era="maratha">
+                    <img src="https://images.unsplash.com/photo-1582652976769-ad2be7049c7d?w=800&h=600&fit=crop&auto=format&q=80" 
+                         alt="Maratha Empire with traditional forts and warriors" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3EMaratha Empire%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div class="image-layer" data-era="medieval">
+                    <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800&h=600&fit=crop&auto=format&q=80" 
+                         alt="Medieval period with historical architecture and trade routes" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3EMedieval Period%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div class="image-layer" data-era="ancient">
+                    <img src="https://images.unsplash.com/photo-1580500550469-1ccb7c6a4e8c?w=800&h=600&fit=crop&auto=format&q=80" 
+                         alt="Ancient era with Buddhist caves and Satavahana dynasty artifacts" 
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22600%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23333%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2224%22%3EAncient Era%3C/text%3E%3C/svg%3E'" />
+                </div>
+                <div class="image-overlay" id="imageOverlay"></div>
+            </div>
+
+            <!-- Enhanced Bookmarks Panel -->
+            <div class="bookmarks-panel" id="bookmarksPanel">
+                <div class="bookmarks-header">
+                    <h4>🔖 Bookmarked Events</h4>
+                    <div class="bookmarks-actions">
+                        <button class="btn btn--sm btn--secondary" id="exportBookmarks" title="Export bookmarks">📤</button>
+                        <button class="btn btn--sm btn--secondary" id="clearBookmarks" title="Clear all bookmarks">🗑️</button>
+                    </div>
+                </div>
+                <div class="bookmarks-list" id="bookmarksList">
+                    <p class="bookmarks-empty">No bookmarked events yet. Click the bookmark icon on any event!</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Enhanced Timeline Section -->
+        <div class="timeline-section era-modern" id="timelineSection">
+            <div class="timeline-container" id="timelineContainer">
+                <!-- Timeline events will be dynamically generated -->
+            </div>
+            
+            <!-- Enhanced Background particles -->
+            <div class="particles-container" id="particlesContainer">
+                <div class="particle" style="--delay: 0s; --duration: 20s;"></div>
+                <div class="particle" style="--delay: 2s; --duration: 25s;"></div>
+                <div class="particle" style="--delay: 4s; --duration: 30s;"></div>
+                <div class="particle" style="--delay: 6s; --duration: 22s;"></div>
+                <div class="particle" style="--delay: 8s; --duration: 28s;"></div>
+                <div class="particle" style="--delay: 10s; --duration: 18s;"></div>
+                <div class="particle" style="--delay: 12s; --duration: 26s;"></div>
+                <div class="particle" style="--delay: 14s; --duration: 24s;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Offline Indicator -->
+    <div class="offline-indicator hidden" id="offlineIndicator">
+        <span class="offline-icon">📶</span>
+        <span class="offline-text">You're currently offline</span>
+    </div>
+
+    <!-- Screen Reader Announcements -->
+    <div aria-live="polite" aria-atomic="true" class="sr-only" id="announcer"></div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    // Service worker registration failed, continue without offline support
+                });
+            });
+        }
+    </script>
+
+    <script src="app.js"></script>
+</body>
+</html>
